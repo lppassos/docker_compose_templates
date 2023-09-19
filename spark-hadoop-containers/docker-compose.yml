@@ -81,7 +81,7 @@ services:
 
   # Spark client
   spark:
-    build: ./containers/spark-machine
+    build: bitnami/spark:latest
     environment:
       - SPARK_MODE=master
       - SPARK_RPC_AUTHENTICATION_ENABLED=no
