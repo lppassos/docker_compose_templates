@@ -17,12 +17,16 @@ services:
     environment:
       ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
       HADOOP_HOME: "/opt/hadoop"
+    volumes:
+      - namenodedata:/tmp
 
   datanode:
     image: apache/hadoop:3
     command: ["hdfs", "datanode"]
     env_file:
       - ./configs/config
+    volumes:
+      - datanodedata:/tmp
 
   resourcemanager:
     image: apache/hadoop:3
@@ -51,7 +55,7 @@ services:
       - HIVE_CUSTOM_CONF_DIR=/hive_conf
     volumes:
       - ./configs:/hive_conf
-      - ./data_files/hive_metastore:/opt/hive/data/warehouse
+      - hiveserverdata:/opt/hive/data/warehouse
 
   # Front-end to be able to query hive more easily
   hue_server:
@@ -70,7 +74,7 @@ services:
       - 33061:3306
     command: --init-file /data/application/init.sql
     volumes:
-      - ./data_files/mysql/data:/var/lib/mysql
+      - mysqldata:/var/lib/mysql
       - ./configs/mysql/init.sql:/data/application/init.sql
     environment:
         MYSQL_ROOT_USER: root
@@ -89,9 +93,16 @@ services:
       - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
       - SPARK_SSL_ENABLED=no
       - SPARK_USER=spark
-      - YARN_CONF_DIR=/opt/bitnami/spark/scripts/configs
+      - YARN_CONF_DIR=/opt/bitnami/spark/custom_configs
     ports:
       - '8080:8080'
     volumes:
       - ./config/spark-defaults.conf:/opt/bitnami/spark/conf/spark-defaults.conf
+      - ./configs:/opt/bitnami/spark/custom_configs
       - .:/opt/bitnami/spark/scripts
+
+volumes:
+  mysqldata:
+  hiveserverdata:
+  namenodedata:
+  datanodedata:
