@@ -1,0 +1,14 @@
+$TTL 2d
+;$ORIGIN localdomain.my
+; top level entry
+@         IN      SOA   ns1.localdomain.my hostmaster.localdomain.my (
+                                2003080800 ; serial number
+                                12h        ; refresh
+                                15m        ; update retry
+                                3w         ; expiry
+                                2h         ; minimum
+                                )
+; name server RR for the domain
+           IN      NS      ns1.localdomain.my
+
+*        IN      A       127.0.0.1
