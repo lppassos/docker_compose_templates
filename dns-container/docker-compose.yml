@@ -1,0 +1,12 @@
+
+version: '2'
+
+services:
+
+  dns_service:
+    build: containers/dns
+    ports:
+      - "1025:53"
+    volumes:
+      - ./named.conf:/etc/bind/named.conf
+      - ./localdomain.my:/etc/bind/master/localdomain.my
