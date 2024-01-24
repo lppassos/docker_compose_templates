@@ -1,0 +1,16 @@
+
+version: "3"
+services:
+  db:
+    hostname: oracledb
+    container_name: oracledb
+    image: container-registry.oracle.com/database/free:latest
+    restart: always
+    ports:
+      - "1521:1521"
+      - "5550:5550"
+      - "2484:2484"
+    environment:
+      - ORACLE_PWD=oracle
+    volumes:
+      - /opt/oracle/oradata
