@@ -14,4 +14,5 @@ services:
 * [Yarn](http://localhost:8088)
 * [Spark](http://localhost:8080)
 
-It also includes a mysql image to store some data.
+It also includes a mysql image to store the hive catalog.
+

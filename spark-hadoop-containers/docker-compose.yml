@@ -18,7 +18,7 @@ services:
       ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
       HADOOP_HOME: "/opt/hadoop"
     volumes:
-      - namenodedata:/tmp
+      - namenodedata:/data
 
   datanode:
     image: apache/hadoop:3
@@ -26,7 +26,9 @@ services:
     env_file:
       - ./configs/config
     volumes:
-      - datanodedata:/tmp
+      - datanodedata:/data
+    depends_on:
+      - namenode
 
   resourcemanager:
     image: apache/hadoop:3
@@ -65,7 +67,8 @@ services:
     volumes:
       - ./configs/hue/hue.ini:/usr/share/hue/desktop/conf/z-hue.ini
     depends_on:
-      - "database"
+      database:
+        condition: service_healthy
 
   # MYSQL Database to support hue
   database:
@@ -82,10 +85,12 @@ services:
         MYSQL_DATABASE: hue
         MYSQL_USER: adm
         MYSQL_PASSWORD: secret
+    healthcheck:
+      test: mysqladmin ping --user=adm --password=secret
 
   # Spark client
   spark:
-    build: bitnami/spark:latest
+    image: bitnami/spark:latest
     environment:
       - SPARK_MODE=master
       - SPARK_RPC_AUTHENTICATION_ENABLED=no
@@ -97,7 +102,7 @@ services:
     ports:
       - '8080:8080'
     volumes:
-      - ./config/spark-defaults.conf:/opt/bitnami/spark/conf/spark-defaults.conf
+      - ./configs/spark-defaults.conf:/opt/bitnami/spark/conf/spark-defaults.conf
       - ./configs:/opt/bitnami/spark/custom_configs
       - .:/opt/bitnami/spark/scripts
 
