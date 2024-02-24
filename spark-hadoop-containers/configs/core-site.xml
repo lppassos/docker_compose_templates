@@ -1,0 +1,16 @@
+<configuration>
+<property><name>fs.default.name</name><value>hdfs://namenode</value></property>
+<property><name>fs.defaultFS</name><value>hdfs://namenode</value></property>
+<property>
+    <name>hadoop.user.group.static.mapping.overrides</name>
+    <value>hue=supergroup;admin=users</value>
+</property>
+<property>
+    <name>hadoop.proxyuser.hue.hosts</name>
+    <value>*</value>
+</property>
+<property>
+    <name>hadoop.proxyuser.hue.groups</name>
+    <value>users</value>
+</property>
+</configuration>
