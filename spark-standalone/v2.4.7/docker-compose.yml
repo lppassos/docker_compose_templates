@@ -1,0 +1,33 @@
+# Description of the docker environment for testing spark jobs
+#
+# Instances a very small cluster with a master node and a worker node
+#
+version: '2'
+
+services:
+
+  # Spark client
+  spark:
+    image: local/spark:2.4.7
+    build: images/spark
+    environment:
+      SPARK_MODE: master
+      SPARK_RPC_AUTHENTICATION_ENABLED: no
+      SPARK_RPC_ENCRYPTION_ENABLED: no
+      SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED: no
+      YARN_CONF_DIR: /opt/bitnami/spark/scripts/configs
+    ports:
+      - '8080:8080'
+      - '4040:4040'
+    volumes:
+      - ./configs/spark-defaults.conf:/opt/bitnami/spark/conf/spark-defaults.conf
+      - .:/opt/spark/scripts2
+
+  spark-worker:
+    image: local/spark:2.4.7
+    build: images/spark
+    environment:
+      SPARK_MODE: worker
+      SPARK_MASTER_URL: spark://spark:7077
+      SPARK_WORKER_MEMORY: 1G
+      SPARK_WORKER_CORES: 1
