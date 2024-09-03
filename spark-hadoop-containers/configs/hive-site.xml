@@ -17,6 +17,56 @@
 -->
 <configuration>
     <property>
+        <name>javax.jdo.option.ConnectionURL</name>
+        <value>jdbc:mysql://database:3306/metastore?useSSL=false&amp;createDatabaseIfNotExist=true</value>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionDriverName</name>
+        <value>com.mysql.jdbc.Driver</value>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionUserName</name>
+        <value>hive</value>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionPassword</name>
+        <value>hivepassword</value>
+    </property>
+    <property>
+        <name>hive.metastore.uris</name>
+        <value>thrift://hivemetastore:9083</value>
+    </property>
+    <property>
+        <name>hive.metastore.client.connect.retry.delay</name>
+        <value>5</value>
+    </property>
+    <!--
+    <property>
+        <name>datanucleus.autoCreateSchema</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>datanucleus.fixedDatastore</name>
+        <value>false</value>
+    </property>
+    <property>
+        <name>datanucleus.autoStartMechanismMode</name>
+        <value>checked</value>
+    </property>
+    <property>
+        <name>hive.metastore.schema.verification</name>
+        <value>false</value>
+    </property>
+    <property>
+        <name>hive.metastore.schema.verification.record.version</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>datanucleus.connectionPool.maxWait</name>
+        <value>60000</value>
+    </property>
+    -->
+    <property>
         <name>hive.server2.enable.doAs</name>
         <value>false</value>
     </property>
@@ -54,7 +104,7 @@
     </property>
     <property>
         <name>hive.execution.engine</name>
-        <value>tez</value>
+        <value>mr</value>
     </property>
     <property>
         <name>metastore.warehouse.dir</name>
@@ -63,5 +113,9 @@
     <property>
         <name>metastore.metastore.event.db.notification.api.auth</name>
         <value>false</value>
+    </property>
+    <property>
+        <name>hive.root.logger</name>
+        <value>DEBUG,console</value>
     </property>
 </configuration>
