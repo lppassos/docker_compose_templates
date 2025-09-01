@@ -1,0 +1,10 @@
+
+= Test
+
+this is just a test
+
+[chart]
+----
+x,y
+1,5
+----
