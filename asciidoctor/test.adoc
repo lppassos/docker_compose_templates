@@ -3,9 +3,23 @@
 
 this is just a test
 
-[chart, caption="Example"]
+[chart, caption="Example", width=10%]
 ----
 type: line
+x-fields: x
+y-fields: y1, y2
+data:
+x, y1, y2
+1, 5,  7
+2, 7,  10
+3, 5,  3
+----
+
+another test
+
+[chart, caption="Another Example"]
+----
+type: bar
 x-fields: x
 y-fields: y1, y2
 data:

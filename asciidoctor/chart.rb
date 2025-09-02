@@ -2,6 +2,7 @@
 require 'asciidoctor'
 require 'asciidoctor/extensions'
 require 'gruff'
+require 'securerandom'
 
 Asciidoctor::Extensions.register do
   block ChartBlockProcessor, :chart
@@ -32,10 +33,11 @@ class ChartBlockProcessor < Asciidoctor::Extensions::BlockProcessor
     FileUtils.mkdir_p(image_gen_dir) unless Dir.exist?(image_gen_dir)
 
     # Auxiliary information specific to the document comes from the block options
-    target_image = attrs[:target] || 'default.png'
+    target_image = attrs[:target] || SecureRandom.uuid + '.png'
     img_attrs = {
-      "alt" => attrs[:caption],
-      "width" => "300",
+      "alt" => attrs["caption"],
+      "title" => attrs["caption"],
+      "width" => attrs["width"] || "75%",
       "target" => image_gen_dir + '/' + target_image
     }
 
@@ -52,6 +54,8 @@ class ChartBlockProcessor < Asciidoctor::Extensions::BlockProcessor
     case metadata.type
     when "line"
       return generate_line_chart parent, metadata
+    when "bar"
+      return generate_bar_chart parent, metadata
     else
       raise "Unsupported chart type #{metadata.type}"
     end
@@ -63,13 +67,22 @@ class ChartBlockProcessor < Asciidoctor::Extensions::BlockProcessor
     g.title = metadata.title
     g.theme = build_theme parent
     g.labels = metadata.data.map { |r| r[metadata.xFields[0]] }
-    series = []
-    metadata.yFields.each do |name|
-      series << {
-        name: name,
-        values: metadata.data.map { |r| r[name].to_f }
-      }
+    series = get_series_data metadata
+
+    series.each do |y|
+      g.data y[:name], y[:values]
     end
+    return g
+  end
+
+  def generate_bar_chart(parent, metadata)
+    g = Gruff::Bar.new
+
+    g.title = metadata.title
+    g.theme = build_theme parent
+    g.labels = metadata.data.map { |r| r[metadata.xFields[0]] }
+    series = get_series_data metadata
+
     series.each do |y|
       g.data y[:name], y[:values]
     end
@@ -114,7 +127,19 @@ class ChartBlockProcessor < Asciidoctor::Extensions::BlockProcessor
   def build_theme(parent)
     colors = parent.document.attr("theme-chart-colors",nil)
     return {
+      width: 2200,
       background_colors: nil
     }
+  end
+
+  def get_series_data(metadata)
+    series = []
+    metadata.yFields.each do |name|
+      series << {
+        name: name,
+        values: metadata.data.map { |r| r[name].to_f }
+      }
+    end
+    return series
   end
 end
