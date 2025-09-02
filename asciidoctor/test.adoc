@@ -3,8 +3,14 @@
 
 this is just a test
 
-[chart]
+[chart, caption="Example"]
 ----
-x,y
-1,5
+type: line
+x-fields: x
+y-fields: y1, y2
+data:
+x, y1, y2
+1, 5,  7
+2, 7,  10
+3, 5,  3
 ----
