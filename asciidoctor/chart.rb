@@ -11,6 +11,8 @@ end
 # Large chart image width to ensure when scaling in the pdf it works well
 CHART_SCALABLE_WIDTH = 2200
 
+DEFAULT_CHART_COLORS = [ "red", "green", "blue", "orange" ]
+
 # All the information we need for drawing the chart, extracted from the
 # contents of the block
 class ChartMetadata
@@ -63,6 +65,8 @@ class ChartMetadata
   end
 end
 
+# Custom block processor for asciidoctor to include a chart into a document
+#
 class ChartBlockProcessor < Asciidoctor::Extensions::BlockProcessor
   use_dsl
 
@@ -98,7 +102,7 @@ class ChartBlockProcessor < Asciidoctor::Extensions::BlockProcessor
     case metadata.type
     when "line"
       g = generate_line_chart parent, metadata
-    when "bar"
+    when "bar", "sidebar"
       g = generate_bar_chart parent, metadata
     else
       raise "Unsupported chart type #{metadata.type}"
@@ -123,7 +127,14 @@ class ChartBlockProcessor < Asciidoctor::Extensions::BlockProcessor
   end
 
   def generate_bar_chart(parent, metadata)
-    g = Gruff::Bar.new
+    case metadata.type
+    when "bar"
+      g = Gruff::Bar.new
+    when "sidebar"
+      g = Gruff::SideBar.new
+    else
+      raise "INTERNAL: Incorrect mapping to bar chart (#{metadata.type})"
+    end
 
     g.labels = metadata.data.map { |r| r[metadata.xFields[0]] }
     series = get_series_data metadata
@@ -134,17 +145,22 @@ class ChartBlockProcessor < Asciidoctor::Extensions::BlockProcessor
     return g
   end
 
+  end
+
   # Generate the theme for use in the chart loading it from the theme to use
   # in the document
   #
   # @param document the document currently being generated
   # @return the Gruff theme
   def build_theme(parent)
-    colors = parent.document.attr("theme-chart-colors",nil)
+    colors = parent.document.attr("theme-chart-colors", DEFAULT_CHART_COLORS)
+    font_color = parent.document.attr("theme-chart-font-color", 'black')
+    background_colors = parent.document.attr("theme-chart-background-color", nil)
     return {
-      colors: [ "limegreen", "blue", "purple" ],
+      colors: colors,
       width: CHART_SCALABLE_WIDTH,
-      background_colors: nil
+      font_color: font_color,
+      background_colors: background_colors
     }
   end
 
