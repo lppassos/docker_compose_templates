@@ -37,7 +37,10 @@ class ChartMetadata
     header = []
     reader.lines.each do |line|
       if in_data_mode
-        row_data = line.strip.split(",").map(&:strip)
+        row_data = line.strip.split(",").map(&lambda {|v|
+          a = v.strip()
+          if a == "" then nil else a end
+        })
         if first_row
           header = row_data.clone
           first_row = false
@@ -104,6 +107,8 @@ class ChartBlockProcessor < Asciidoctor::Extensions::BlockProcessor
       g = generate_line_chart parent, metadata
     when "bar", "sidebar"
       g = generate_bar_chart parent, metadata
+    when "scatter"
+      g = generate_scatter_chart parent, metadata
     else
       raise "Unsupported chart type #{metadata.type}"
     end
@@ -145,6 +150,33 @@ class ChartBlockProcessor < Asciidoctor::Extensions::BlockProcessor
     return g
   end
 
+  def generate_scatter_chart(parent, metadata)
+    g = Gruff::Scatter.new
+
+    series = []
+    min_x = nil
+    max_x = nil
+    metadata.yFields.each_with_index do |name, index|
+      x_coord = []
+      y_coord = []
+      metadata.data.each do |r|
+        unless r[name] == nil
+          x = r[metadata.xFields[0]].to_f
+          x_coord << x
+          y_coord << r[name].to_f
+          if min_x == nil || min_x > x
+            min_x = x
+          end
+          if max_x == nil || max_x < x
+            max_x = x
+          end
+        end
+      end 
+      g.data name, x_coord, y_coord
+    end
+    x_step = (max_x - min_x)/10
+    g.labels = (min_x..max_x).step(x_step)
+    return g
   end
 
   # Generate the theme for use in the chart loading it from the theme to use
