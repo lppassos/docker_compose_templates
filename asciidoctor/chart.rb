@@ -16,13 +16,14 @@ DEFAULT_CHART_COLORS = [ "red", "green", "blue", "orange" ]
 # All the information we need for drawing the chart, extracted from the
 # contents of the block
 class ChartMetadata
-  attr_accessor :type, :title, :xFields, :yFields, :yNames, :data
+  attr_accessor :type, :title, :xFields, :yFields, :yNames, :showLines, :data
 
   def initialize()
     @type = "line"
     @xFields = []
     @yFields = []
     @yNames = []
+    @showLines = false
     @data = []
   end
 
@@ -60,6 +61,8 @@ class ChartMetadata
           @xFields = value
         when "y-fields"
           @yFields = value.split(',').map(&:strip)
+        when "show-lines"
+          @showLines = if value == "true" then true else false end
         else
           raise "Unknown chart setting #{key}"
         end
@@ -151,7 +154,11 @@ class ChartBlockProcessor < Asciidoctor::Extensions::BlockProcessor
   end
 
   def generate_scatter_chart(parent, metadata)
-    g = Gruff::Scatter.new
+    if metadata.showLines
+      g = Gruff::Line.new
+    else
+      g = Gruff::Scatter.new
+    end
 
     series = []
     min_x = nil
@@ -172,10 +179,21 @@ class ChartBlockProcessor < Asciidoctor::Extensions::BlockProcessor
           end
         end
       end 
-      g.data name, x_coord, y_coord
+      if metadata.showLines
+        g.dataxy name, x_coord, y_coord
+      else
+        g.data name, x_coord, y_coord
+      end
     end
-    x_step = (max_x - min_x)/10
-    g.labels = (min_x..max_x).step(x_step)
+    if metadata.showLines
+      x_step = (max_x - min_x)/10
+      puts "labelling #{min_x} to #{max_x} stepping #{x_step}"
+      g.labels = (min_x..max_x).step(x_step).map {|v| [v, v.to_s]}.to_h
+    else
+      x_step = (max_x - min_x)/10
+      puts "labelling #{min_x} to #{max_x} stepping #{x_step}"
+      g.labels = (min_x..max_x).step(x_step).map {|v,i| [i,v]}.to_h
+    end
     return g
   end
 

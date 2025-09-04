@@ -42,3 +42,18 @@ x, y1, y2
 7, 3,
 10, 5,  3
 ----
+
+[chart, caption="Scatter Example 2"]
+----
+type: scatter
+x-fields: x
+y-fields: y1, y2
+show-lines: true
+data:
+x, y1, y2
+1, 5,  7
+2, 7,  10
+5,,  10
+7, 3,
+10, 5,  3
+----
