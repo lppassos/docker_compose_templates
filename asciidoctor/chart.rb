@@ -197,23 +197,35 @@ class ChartBlockProcessor < Asciidoctor::Extensions::BlockProcessor
     return g
   end
 
+  def load_theme(parent)
+    # Resolve theme path
+    theme_name = parent.document.attr('pdf-theme', 'default')
+    themesdir  = parent.document.attr('pdf-themesdir') ||
+      Asciidoctor::PDF::ThemeLoader::ThemesDir
+
+    # Load resolved theme
+    theme = Asciidoctor::PDF::ThemeLoader.load_theme theme_name, themesdir
+    return theme
+  end
+
   # Generate the theme for use in the chart loading it from the theme to use
   # in the document
   #
   # @param document the document currently being generated
   # @return the Gruff theme
   def build_theme(parent)
-    colors = parent.document.attr("theme-chart-colors", DEFAULT_CHART_COLORS)
-    font_color = parent.document.attr("theme-chart-font-color", 'black')
-    background_colors = parent.document.attr("theme-chart-background-color", nil)
+    theme = load_theme parent
+    colors = theme["chart_colors"] || DEFAULT_CHART_COLORS
+    font_color = theme["chart_font_color"] || 'black'
+    background_colors = theme["chart_background_colors"]
+    puts "Theme: #{colors}, #{font_color}, #{background_colors}"
     return {
       colors: colors,
       width: CHART_SCALABLE_WIDTH,
-      font_color: font_color,
-      background_colors: background_colors
+      font_color: "#" + font_color,
+      background_colors: background_colors.map {|v| to_color v.to_s}
     }
   end
-
 
   # Builds the series information to send to a chart
   # 
@@ -229,5 +241,14 @@ class ChartBlockProcessor < Asciidoctor::Extensions::BlockProcessor
       }
     end
     return series
+  end
+
+  def to_color(v)
+    # hack for hexadecimal colors
+    if v.match "[0-9a-fA-F]{3,6}"
+      return "#" + v
+    end
+
+    return v
   end
 end

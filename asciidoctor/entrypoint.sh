@@ -15,6 +15,7 @@ DEFAULT_ARGS="-a pdf-themesdir=/themes -a pdf-fontsdir=/themes/fonts"
 echo "📄 Input docs: $DOC_PATH"
 echo "🎨 Theme path: $THEME_PATH"
 echo "📦 Output path: $OUT_PATH"
+echo "Using theme: $theme"
 
 cd $DOC_PATH
 # Run asciidoctor-pdf with whatever args are passed
@@ -23,7 +24,7 @@ exec asciidoctor -r asciidoctor-pdf -r asciidoctor-diagram \
     -b pdf \
     --trace \
     -a "imagesoutdir=/work/.imggen" \
+    $DEFAULT_ARGS \
+    -a pdf-theme=$theme \
     -a compress \
     -v $doc
-    -a pdf-theme=$theme \
-    $DEFAULT_ARGS

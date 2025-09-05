@@ -47,7 +47,8 @@ docker run --rm `
     -v "${wslThemeDir}:/themes" `
     -v "${wslFileDir}:/docs" `
     asciidoctor-pdf `
-    "/docs/$fileName.adoc"
+    "/docs/$fileName.adoc" `
+    $Theme
 
 if ($Optimize)
 {
