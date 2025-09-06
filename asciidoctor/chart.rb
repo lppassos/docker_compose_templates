@@ -118,7 +118,10 @@ class ChartBlockProcessor < Asciidoctor::Extensions::BlockProcessor
 
     # set common variables of the chart
     g.title = metadata.title
-    g.theme = build_theme parent
+    theme = build_theme parent
+    g.theme = theme
+    # the font face can't be set through the theme
+    g.font = theme[:font]
     return g
   end
 
@@ -218,10 +221,13 @@ class ChartBlockProcessor < Asciidoctor::Extensions::BlockProcessor
     colors = theme["chart_colors"] || DEFAULT_CHART_COLORS
     font_color = theme["chart_font_color"] || 'black'
     background_colors = theme["chart_background_colors"]
-    puts "Theme: #{colors}, #{font_color}, #{background_colors}"
+    font_family = theme["chart_font_family"]
+    font_style = theme["chart_font_style"] || 'normal'
+    font_path = resolve_font_path parent.document, theme, font_family, font_style
     return {
       colors: colors,
       width: CHART_SCALABLE_WIDTH,
+      font: font_path,
       font_color: "#" + font_color,
       background_colors: background_colors.map {|v| to_color v.to_s}
     }
@@ -250,5 +256,31 @@ class ChartBlockProcessor < Asciidoctor::Extensions::BlockProcessor
     end
 
     return v
+  end
+
+  # Translates a font based on the font catalog in the theme
+  #
+  # @param document the current document
+  # @param theme [ThemeData] the current theme
+  # @param family [string] the font family
+  # @param style [string] the font style
+  #
+  # @return The absolute path to the font file to use
+  def resolve_font_path(document, theme, family, style)
+    font_catalog = theme["font_catalog"]
+    font_file = font_catalog.dig(family, style)
+    if not font_file then
+      raise "Font not present in the catalog: #{family}, #{style}"
+    end
+    fonts_dir = document.attr 'pdf-fontsdir', ''
+    dirs = fonts_dir.split(File::PATH_SEPARATOR).map do |d|
+      if d == 'GEM_FONTS_DIR' then AsciiDoctor::PDF::ThemeLoader::FontsDir else d end
+    end
+    dirs.unshift(theme['__dir__']) if theme['__dir__']
+
+    dirs.each do |d|
+      candidate = File.expand_path font_file, d
+      return candidate if File.readable?(candidate)
+    end
   end
 end
